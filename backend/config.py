@@ -1,5 +1,8 @@
 """配置 - 神经元探索系统"""
 import os
+# 强制使用本地缓存，避免每次启动联网检查模型更新
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 LLM_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-1a7612c9e30747dab1b150cd3a759f8f")
