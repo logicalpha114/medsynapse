@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "7860:7860"
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-sk-1a7612c9e30747dab1b150cd3a759f8f}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
