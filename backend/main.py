@@ -5,7 +5,7 @@
 import os, sys, json, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -174,7 +174,7 @@ def explore_chapter(tid: str, cid: str):
 
 # ===== 问答 =====
 @app.post("/api/ask")
-def ask_question(payload: dict):
+def ask_question(payload: dict = Body(...)):
     """RAG问答"""
     q = payload.get("question","")
     if not q: raise HTTPException(400, "问题为空")
@@ -189,7 +189,7 @@ def get_path():
 
 # ===== 对话 =====
 @app.post("/api/dialogue")
-def dialogue(payload: dict):
+def dialogue(payload: dict = Body(...)):
     """多轮对话 - 教师与系统讨论整合方案"""
     msg = payload.get("message", "")
     if not msg: raise HTTPException(400, "消息为空")
@@ -253,10 +253,14 @@ def status():
     return {"parsed_books": parsed, "chapter_summaries": summaries, "indexed": state["indexed"]}
 
 
-# 静态文件
+# 静态文件 - 挂载到 /static，根路径单独处理
 frontend = os.path.join(os.path.dirname(__file__), "..", "frontend")
 if os.path.exists(frontend):
-    app.mount("/", StaticFiles(directory=frontend, html=True), name="frontend")
+    from fastapi.responses import FileResponse
+    @app.get("/")
+    def serve_index():
+        return FileResponse(os.path.join(frontend, "index.html"))
+    app.mount("/static", StaticFiles(directory=frontend), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
